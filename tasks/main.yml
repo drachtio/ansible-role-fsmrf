@@ -18,6 +18,7 @@
 - name: install freeswitch dependencies
   apt: name={{ item }} state=latest
   with_items:
+  - 'freeswitch-meta-all'
   - 'freeswitch-all'
   - 'freeswitch-all-dbg'
   - 'gdb'
