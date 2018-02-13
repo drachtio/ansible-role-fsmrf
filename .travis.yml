@@ -2,7 +2,7 @@
 language: python
 python: "2.7"
 # Use the new container infrastructure
-sudo: required
+dist: precise
 # Install ansible
 addons:
   apt:
