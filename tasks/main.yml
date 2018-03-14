@@ -101,7 +101,9 @@
 
 - name: Copy ipv6 sip profile
   template: src=mrf_ipv6_sip_profile.xml.j2 dest={{freeswitch_path}}conf/sip_profiles/mrf_ipv6.xml owner={{freeswitch_owner}} group={{freeswitch_group}} mode=0644
-  when: hostvars[inventory_hostname]['ansible_default_ipv6']['address']
+  when: 
+    - hostvars[inventory_hostname]['ansible_default_ipv6']
+    - hostvars[inventory_hostname]['ansible_default_ipv6']['address']
 
 - name: copy conference.conf.xml into place
   copy: src=conference.conf.xml dest={{freeswitch_path}}/conf/autoload_configs/conference.conf.xml
