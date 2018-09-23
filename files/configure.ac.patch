@@ -1,0 +1,32 @@
+--- configure.ac	2018-09-23 17:35:06.036000000 +0000
++++ configure.ac.new	2018-09-23 17:41:17.416000000 +0000
+@@ -13,7 +13,7 @@
+ AC_CONFIG_FILES([src/include/switch_version.h.in:src/include/switch_version.h.template])
+ 
+ AC_CONFIG_AUX_DIR(build/config)
+-AM_INIT_AUTOMAKE
++AM_INIT_AUTOMAKE([subdir-objects])
+ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+ AC_CONFIG_SRCDIR([src/switch.c])
+ AC_CONFIG_HEADER([src/include/switch_private.h])
+@@ -1475,6 +1475,20 @@
+       AC_MSG_ERROR([You need to either install libedit-dev (>= 2.11) or configure with --disable-core-libedit-support])
+       ])])])
+ 
++dnl DH: added for including socket.io support
++AC_ARG_WITH(socketio,
++ [AS_HELP_STRING([--with-socketio],
++    [enable support for socket.io client libs])],
++  [with_socketio="$withval"],
++  [with_socketio="no"])
++if test "$with_socketio" = "yes"; then
++  PKG_CHECK_MODULES([SOCKETIO], [boost], [
++    AM_CONDITIONAL([HAVE_SOCKETIO],[true])], [
++    AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_SOCKETIO],[false])])
++else
++  AM_CONDITIONAL([HAVE_SOCKETIO],[false])
++fi
++
+ dnl ---------------------------------------------------------------------------
+ dnl - OpenLDAP SDK
+ dnl ---------------------------------------------------------------------------

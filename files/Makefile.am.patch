@@ -1,0 +1,94 @@
+--- Makefile.am	2018-09-21 18:48:26.472000000 +0000
++++ Makefile.am.new	2018-09-21 20:41:09.284000000 +0000
+@@ -168,6 +168,12 @@
+ CORE_CFLAGS += -DSWITCH_HAVE_FREETYPE $(LIBFREETYPE_CFLAGS)
+ endif
+ 
++# socket.io support
++if HAVE_SOCKETIO
++SOCKETIO_CFLAGS += -I$(switch_srcdir)/libs/socket.io-client-cpp/lib/websocketpp -I$(switch_srcdir)/libs/socket.io-client-cpp/lib/rapidjson/include
++CORE_CFLAGS += -DSWITCH_HAVE_SOCKETIO $(SOCKETIO_CFLAGS)
++endif
++
+ ##
+ ## libfreeswitch
+ ##
+@@ -175,6 +181,9 @@
+ if ENABLE_LIBYUV
+ noinst_LTLIBRARIES += libfreeswitch_libyuv.la
+ endif
++if HAVE_SOCKETIO
++noinst_LTLIBRARIES += libfreeswitch_libsocketio.la
++endif
+ libfreeswitch_spandsp_la_SOURCES = libs/spandsp/src/plc.c libs/spandsp/src/alloc.c libs/spandsp/src/bit_operations.c
+ libfreeswitch_spandsp_la_CFLAGS  = -Ilibs/spandsp/src $(CORE_CFLAGS) $(AM_CFLAGS)
+ CORE_LIBS+=libfreeswitch_spandsp.la
+@@ -229,10 +238,22 @@
+ CORE_LIBS+=libfreeswitch_libyuv.la
+ endif
+ 
++if HAVE_SOCKETIO
++nodist_libfreeswitch_libsocketio_la_SOURCES = \
++	libs/socket.io-client-cpp/src/sio_client.cpp \
++	libs/socket.io-client-cpp/src/sio_socket.cpp \
++	libs/socket.io-client-cpp/src/internal/sio_client_impl.cpp \
++	libs/socket.io-client-cpp/src/internal/sio_packet.cpp
++
++SOCKETIO_CPPFLAGS = $(SOCKETIO_CFLAGS)
++libfreeswitch_libsocketio_la_CPPFLAGS = $(SOCKETIO_CPPFLAGS) -std=c++11 -pthread
++CORE_LIBS+=libfreeswitch_libsocketio.la
++endif
++
+ lib_LTLIBRARIES	         = libfreeswitch.la
+ libfreeswitch_la_CFLAGS  = $(CORE_CFLAGS) $(SQLITE_CFLAGS) $(FREETYPE_CFLAGS) $(CURL_CFLAGS) $(PCRE_CFLAGS) $(SPEEX_CFLAGS) $(LIBEDIT_CFLAGS) $(openssl_CFLAGS)  $(AM_CFLAGS)
+ libfreeswitch_la_LDFLAGS = -version-info 1:0:0 $(AM_LDFLAGS) $(PLATFORM_CORE_LDFLAGS) -no-undefined
+-libfreeswitch_la_LIBADD  = $(CORE_LIBS) $(APR_LIBS) $(SQLITE_LIBS) $(FREETYPE_LIBS) $(CURL_LIBS) $(PCRE_LIBS) $(SPEEX_LIBS) $(LIBEDIT_LIBS) $(openssl_LIBS) $(PLATFORM_CORE_LIBS)
++libfreeswitch_la_LIBADD  = $(CORE_LIBS) $(APR_LIBS) $(SOCKETIO_LIBS) $(SQLITE_LIBS) $(FREETYPE_LIBS) $(CURL_LIBS) $(PCRE_LIBS) $(SPEEX_LIBS) $(LIBEDIT_LIBS) $(openssl_LIBS) $(PLATFORM_CORE_LIBS)
+ libfreeswitch_la_DEPENDENCIES = $(BUILT_SOURCES)
+ 
+ if HAVE_PNG
+@@ -243,6 +264,11 @@
+ libfreeswitch_la_LDFLAGS += $(ODBC_LIB_FLAGS)
+ endif
+ 
++if HAVE_SOCKETIO
++libfreeswitch_la_CFLAGS += $(SOCKETIO_CFLAGS)
++libfreeswitch_la_LIBADD += $(SOCKETIO_LIBS)
++endif
++
+ if ENABLE_ZRTP
+ CORE_CFLAGS += -I$(switch_srcdir)/libs/libzrtp/third_party/bgaes
+ CORE_CFLAGS += -I$(switch_srcdir)/libs/libzrtp/third_party/bnlib
+@@ -436,6 +462,10 @@
+ fs_encode_LDADD += $(ODBC_LIB_FLAGS)
+ endif
+ 
++if HAVE_SOCKETIO
++fs_encode_LDADD += $(SOCKETIO_LIBS)
++endif
++
+ 
+ ##
+ ## tone2wav ()
+@@ -449,6 +479,10 @@
+ tone2wav_LDADD += $(ODBC_LIB_FLAGS)
+ endif
+ 
++if HAVE_SOCKETIO
++tone2wav_LDADD += $(SOCKETIO_LIBS)
++endif
++
+ 
+ ##
+ ## fs_ivrd ()
+@@ -471,6 +505,10 @@
+ freeswitch_LDADD += $(ODBC_LIB_FLAGS)
+ endif
+ 
++if HAVE_SOCKETIO
++freeswitch_LDADD += $(SOCKETIO_LIBS)
++endif
++
+ 
+ ##
+ ## Scripts
