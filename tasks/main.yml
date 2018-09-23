@@ -24,7 +24,7 @@
   - 'libyuv-dev'
   - 'libvpx2-dev'
   - 'unixodbc-dev'
-  - 'libmyodbc'
+#  - 'libmyodbc'
   - 'mysql-common'
   - 'mysql-client'
 
@@ -130,3 +130,6 @@
   template: src=freeswitch_log_rotation.j2 dest=/etc/cron.daily/freeswitch_log_rotation owner={{freeswitch_owner}} group={{freeswitch_group}}
 
 - file: path=/etc/cron.daily/freeswitch_log_rotation mode="a+x"
+
+- include: grpc.yml
+  when:  install_grpc_libs == true
