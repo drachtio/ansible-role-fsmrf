@@ -1,0 +1,9 @@
+includedir=/usr/local/include
+libdir=/usr/local/lib
+
+Name: boost
+Description: boost C++ libraries and headers
+Version: 1.68.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lboost_system -lboost_date_time -lboost_random
+Libs.private:
