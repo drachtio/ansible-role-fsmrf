@@ -35,7 +35,7 @@
 +	libs/socket.io-client-cpp/src/internal/sio_packet.cpp
 +
 +SOCKETIO_CPPFLAGS = $(SOCKETIO_CFLAGS)
-+libfreeswitch_libsocketio_la_CPPFLAGS = $(SOCKETIO_CPPFLAGS) -std=c++11 -pthread
++libfreeswitch_libsocketio_la_CPPFLAGS = $(SOCKETIO_CPPFLAGS) -DSIO_TLS -std=c++11 -pthread
 +CORE_LIBS+=libfreeswitch_libsocketio.la
 +endif
 +

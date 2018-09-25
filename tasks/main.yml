@@ -27,6 +27,7 @@
   - 'libmyodbc'
   - 'mysql-common'
   - 'mysql-client'
+  - 'pkg-config'
 
 - name: install freeswitch video dependencies
   apt: name=freeswitch-video-deps-most state=latest force=yes
@@ -45,9 +46,6 @@
 - name: copy modules.conf into place
   copy: src=modules.conf dest={{freeswitch_sources_path}}/modules.conf
 
-- name: bootstrap 
-  shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
-
 - name: patch spandsp (https://freeswitch.org/jira/browse/FS-8736)
   copy: src=memmove.m4 dest=/usr/local/src/freeswitch/libs/spandsp/m4/memmove.m4
 
@@ -58,8 +56,56 @@
     line: "m4_include(m4/memmove.m4)"
     insertafter: "m4/ax_func_aligned_alloc.m4"
 
+- name: patch configure.ac
+  patch:
+    src: configure.ac.patch
+    dest: "{{freeswitch_sources_path}}/configure.ac"
+
+- name: patch Makefile.am
+  patch:
+    src: Makefile.am.patch
+    dest: "{{freeswitch_sources_path}}/Makefile.am"
+
+- name: copy boost.pc pkg-config
+  copy: src=boost.pc dest=/usr/lib/pkgconfig/boost.pc
+
+- name: download boost
+  get_url: 
+    url: https://dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
+    dest: /usr/local/src/freeswitch/libs
+
+- name: untar boost
+  shell: tar xvfz boost_1_68_0.tar.gz 
+  args:
+    chdir: /usr/local/src/freeswitch/libs
+
+- name: create boost build directory if necessary
+  file: path=/usr/local/src/freeswitch/libs/boost_1_68_0/build state=directory
+
+- name: build boost
+  shell: ./bootstrap.sh —prefix=build —libdir=/usr/lib —includedir=/usr/local/include --with-libraries=system,date_time,random && ./b2 install
+  args:
+    chdir: /usr/local/src/freeswitch/libs/boost_1_68_0
+
+- name: install socket.io-cpp-client
+  git: 
+    repo: https://github.com/socketio/socket.io-client-cpp.git
+    dest: /usr/local/src/freeswitch/libs/socket.io-client-cpp
+    version: master
+    depth: 50
+    force: yes
+    recursive: yes
+
+- name: update latest websocketpp
+  shell: git pull origin master
+  args:
+    chdir: /usr/local/src/freeswitch/libs/socket.io-client-cpp/lib/websocketpp
+
+- name: bootstrap 
+  shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
+
 - name: Freeswitch configuration
-  shell: ./{{freeswitch_configure_command}} chdir={{freeswitch_sources_path}}
+  shell: ./{{freeswitch_configure_command}} --with-socketio chdir={{freeswitch_sources_path}}
 
 - name: FreeSwitch make
   shell: make chdir={{freeswitch_sources_path}}
@@ -113,6 +159,9 @@
 
 - name: Change ownership of FreeSwitch binary files
   file: path={{freeswitch_path}}bin/ owner={{freeswitch_owner}} group={{freeswitch_group}} mode="u=rwx,g=rx" state=directory recurse=yes
+
+- name: install /etc/default/freeSwitch
+  copy: src=default_freeswitch dest=/etc/default/freeswitch
 
 - name: unmask freeswitch service
   shell: systemctl unmask freeswitch
