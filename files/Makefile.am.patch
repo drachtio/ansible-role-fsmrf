@@ -66,7 +66,9 @@
 +	libs/googleapis/gens/google/api/experimental/experimental.pb.cc \
 +	libs/googleapis/gens/google/api/auth.grpc.pb.cc \
 +	libs/googleapis/gens/google/api/distribution.grpc.pb.cc \
-+	libs/googleapis/gens/google/api/label.grpc.pb.cc \
++ libs/googleapis/gens/google/api/label.grpc.pb.cc \
++ libs/googleapis/gens/google/api/launch_stage.grpc.pb.cc \
++ libs/googleapis/gens/google/api/launch_stage.pb.cc \
 +	libs/googleapis/gens/google/api/httpbody.grpc.pb.cc \
 +	libs/googleapis/gens/google/api/config_change.grpc.pb.cc \
 +	libs/googleapis/gens/google/api/logging.grpc.pb.cc \

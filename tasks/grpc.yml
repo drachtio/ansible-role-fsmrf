@@ -21,17 +21,27 @@
 
 - name: check out grpc
   git: repo=https://github.com/grpc/grpc
-    dest={{freeswitch_sources_path}}/libs/grpc
-    version={{latest_grpc_release.stdout}}
+    dest=/usr/local/src/grpc
+#   version={{latest_grpc_release.stdout}}
+    version=v1.15.0
     depth=50
     accept_hostkey=yes
     force=yes
-      
+            
 - name: update submodules
-  shell: git submodule update --init --recursive chdir={{freeswitch_sources_path}}/libs/grpc
+  shell: git submodule update --init --recursive
+  args:
+    chdir: /usr/local/src/grpc
+
+- name: build grpc protobuf
+  shell: ./autogen.sh && ./configure && make install 
+  args:
+    chdir: /usr/local/src/grpc/third_party/protobuf
 
 - name: build grpc
-  shell: make && make install chdir={{freeswitch_sources_path}}/libs/grpc
+  shell: export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && make && make install 
+  args:
+    chdir: /usr/local/src/grpc
 
 - name: check out googleapis
   git: repo=https://github.com/googleapis/googleapis
@@ -55,7 +65,7 @@
     dest: "{{freeswitch_sources_path}}/Makefile.am"
 
 - name: re-run Freeswitch configuration
-  shell: ./{{freeswitch_configure_command}} chdir={{freeswitch_sources_path}}
+  shell: ./{{freeswitch_configure_command}} --with-grpc=yes chdir={{freeswitch_sources_path}}
 
 - name: re-run FreeSwitch make
   shell: make chdir={{freeswitch_sources_path}}
