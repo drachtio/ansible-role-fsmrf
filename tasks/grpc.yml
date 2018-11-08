@@ -22,7 +22,6 @@
 - name: check out grpc
   git: repo=https://github.com/grpc/grpc
     dest=/usr/local/src/grpc
-#   version={{latest_grpc_release.stdout}}
     version=v1.15.0
     depth=50
     accept_hostkey=yes
