@@ -33,7 +33,7 @@
 - name: check out freeswitch code
   git: repo=https://freeswitch.org/stash/scm/fs/freeswitch.git
        dest={{freeswitch_sources_path}}
-       version={{freeswitch_version}}
+       version=v1.8
        depth=50
        accept_hostkey=yes
        force=yes
@@ -79,7 +79,7 @@
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
 
 - name: Freeswitch configuration
-  shell: ./{{freeswitch_configure_command}} chdir={{freeswitch_sources_path}} --with-lws=yes
+  shell: ./{{freeswitch_configure_command}} chdir={{freeswitch_sources_path}}
 
 - name: FreeSwitch make
   shell: make chdir={{freeswitch_sources_path}}

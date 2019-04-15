@@ -1,18 +1,36 @@
 # ansible-role-fsmrf [![Build Status](https://secure.travis-ci.org/davehorton/ansible-role-fsmrf.png)](http://travis-ci.org/davehorton/ansible-role-fsmrf)
 
-This is an ansible role for building a [Freeswitch](https://freeswitch.org/) that is configured to work with the [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf) module.
+This is an ansible role for building a [Freeswitch](https://freeswitch.org/) v1.8 that is configured to work with the [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf) module.  The [mod_audio_fork](https://github.com/davehorton/drachtio-freeswitch-modules/blob/master/modules/mod_audio_fork/README.md) module is built and installed as part of this role.
 
 ## Freeswitch modules
-Edit the list of freeswitch modules in [files/modules.conf](files/modules.conf) as desired.
+Because this is designed for use as a media server via [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf), a very limited list of modules are built and installed:
+```xml
+	  <load module="mod_console"/>
+    <load module="mod_audio_fork"/>
+    <load module="mod_logfile"/>
+    <load module="mod_cdr_csv"/>
+    <load module="mod_event_socket"/>
+    <load module="mod_sofia"/>
+    <load module="mod_rtc"/>
+    <load module="mod_commands"/>
+    <load module="mod_conference"/>
+    <load module="mod_dptools"/>
+    <load module="mod_dialplan_xml"/>
+    <load module="mod_spandsp"/>
+    <load module="mod_g723_1"/>
+    <load module="mod_g729"/>
+    <load module="mod_amr"/>
+    <load module="mod_opus"/>
+    <load module="mod_sndfile"/>
+    <load module="mod_native_file"/>
+    <load module="mod_local_stream"/>
+    <load module="mod_tone_stream"/>
+	  <load module="mod_say_en"/>
+```
 
 ## Role variables
 
 Available variables are listed below, along with default values (see defaults/main.yml):
-
-```
-freeswitch_version: v1.6 
-```
-specifies which version of freeswitch you want to install
 
 ```
 freeswitch_sources_path: /usr/local/src/freeswitch/
@@ -42,18 +60,12 @@ freeswitch_socket_acl:
 add any addresses (in cidr format) that should be allowed to connect to event socket
 
 ```
-freeswitch_owner: freeswitch
-freeswitch_group: daemon
-```
-freeswitch owner and group
-
-```
 freeswitch_modules_template: ../templates/modules.conf 
 ```
 modules.conf file used for FreeSwitch compilation
 
 ```
-freeswitch_configure_command: configure 
+freeswitch_configure_command: configure --with-lws=yes
 ```
 freeswitch configure command - you can add option
 
@@ -69,6 +81,6 @@ freeswitch log configuration file template
 - hosts: all
   become: yes
   roles:
-    - ansible-role-drachtio
+    - ansible-role-fsmrf
   become: yes
 ```
