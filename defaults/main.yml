@@ -1,6 +1,6 @@
 ---
 # specific which version of freeswitch you want to install
-freeswitch_version: v1.6 
+freeswitch_version: v1.8
 
 # path to the FreeSwitch source directory
 freeswitch_sources_path: /usr/local/src/freeswitch/
