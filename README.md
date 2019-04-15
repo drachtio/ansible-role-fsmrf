@@ -16,6 +16,7 @@ Because this is designed for use as a media server via [drachtio-fsmrf](https://
   <load module="mod_conference"/>
   <load module="mod_dptools"/>
   <load module="mod_dialplan_xml"/>
+  <load module="mod_httapi"/>
   <load module="mod_spandsp"/>
   <load module="mod_g723_1"/>
   <load module="mod_g729"/>
