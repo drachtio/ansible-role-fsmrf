@@ -5,27 +5,27 @@ This is an ansible role for building a [Freeswitch](https://freeswitch.org/) v1.
 ## Freeswitch modules
 Because this is designed for use as a media server via [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf), a very limited list of modules are built and installed:
 ```xml
-	  <load module="mod_console"/>
-    <load module="mod_audio_fork"/>
-    <load module="mod_logfile"/>
-    <load module="mod_cdr_csv"/>
-    <load module="mod_event_socket"/>
-    <load module="mod_sofia"/>
-    <load module="mod_rtc"/>
-    <load module="mod_commands"/>
-    <load module="mod_conference"/>
-    <load module="mod_dptools"/>
-    <load module="mod_dialplan_xml"/>
-    <load module="mod_spandsp"/>
-    <load module="mod_g723_1"/>
-    <load module="mod_g729"/>
-    <load module="mod_amr"/>
-    <load module="mod_opus"/>
-    <load module="mod_sndfile"/>
-    <load module="mod_native_file"/>
-    <load module="mod_local_stream"/>
-    <load module="mod_tone_stream"/>
-	  <load module="mod_say_en"/>
+  <load module="mod_console"/>
+  <load module="mod_audio_fork"/>
+  <load module="mod_logfile"/>
+  <load module="mod_cdr_csv"/>
+  <load module="mod_event_socket"/>
+  <load module="mod_sofia"/>
+  <load module="mod_rtc"/>
+  <load module="mod_commands"/>
+  <load module="mod_conference"/>
+  <load module="mod_dptools"/>
+  <load module="mod_dialplan_xml"/>
+  <load module="mod_spandsp"/>
+  <load module="mod_g723_1"/>
+  <load module="mod_g729"/>
+  <load module="mod_amr"/>
+  <load module="mod_opus"/>
+  <load module="mod_sndfile"/>
+  <load module="mod_native_file"/>
+  <load module="mod_local_stream"/>
+  <load module="mod_tone_stream"/>
+  <load module="mod_say_en"/>
 ```
 
 ## Role variables
