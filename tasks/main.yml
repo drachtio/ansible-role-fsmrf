@@ -1,13 +1,20 @@
 ---
 
-- name: Update apt-cache
+- name: update apt-cache
   apt: update_cache=yes 
 
-- name:  get build dependencies
+- name:  install build dependencies
   apt: 
     state: latest
     name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 
-        'libtool', 'libtool-bin', 'build-essential', 'pkg-config', 'ca-certificates']
+        'libtool', 'build-essential', 'pkg-config', 'ca-certificates']
+
+- name: install libtool-bin
+apt: 
+    name: libtool-bin 
+    state: latest
+when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+ignore_errors: yes          
 
 - name: install key for source code 
   shell: wget  --no-check-certificate  -O - https://files.freeswitch.org/repo/deb/freeswitch-1.8/fsstretch-archive-keyring.asc | apt-key add -
@@ -58,7 +65,7 @@
   args:
     warn: False
 
-- name: apply patches
+- name: apply patches to build lws and mod_audio_fork
   patch:
     remote_src: no
     src: "{{ item.src }}"
@@ -75,11 +82,26 @@
     chdir: "{{freeswitch_sources_path}}/libs/libwebsockets"
     warn: False
 
+- include_tasks: grpc.yml 
+  when: build_with_grpc|bool
+  
 - name: bootstrap 
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
 
 - name: Freeswitch configuration
-  shell: ./{{freeswitch_configure_command}} chdir={{freeswitch_sources_path}}
+  shell: ./{{freeswitch_configure_command}} --with-grpc=yes
+  args:
+    chdir: "{{freeswitch_sources_path}}"
+    warn: False
+  when: build_with_grpc|bool
+
+- name: Freeswitch configuration
+  shell: ./{{freeswitch_configure_command}}
+  args:
+    chdir: "{{freeswitch_sources_path}}"
+    warn: False
+  when: not build_with_grpc|bool
+
 
 - name: FreeSwitch make
   shell: make chdir={{freeswitch_sources_path}}
