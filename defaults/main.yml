@@ -21,7 +21,7 @@ freeswitch_owner: freeswitch
 freeswitch_group: daemon
 
 # freeswitch configure command - you can add option
-freeswitch_configure_command: configure --with-lws=yes
+freeswitch_configure_command: configure CFLAGS="-D__alloca=alloca" --with-lws=yes
 
 # freeswitch log configuration file template
 freeswitch_log_conf_template: ../templates/logfile.conf.xml
