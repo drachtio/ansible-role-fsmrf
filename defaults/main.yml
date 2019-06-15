@@ -8,6 +8,9 @@ freeswitch_path: /usr/local/freeswitch/
 # freeswitch secret
 freeswitch_secret: ClueCon 
 
+# freeswitch version
+freeswitch_version: v1.8.5 
+
 # sip ports to listen on
 freeswitch_sip_port: 5080
 freeswitch_dtls_sip_port: 5081

@@ -7,7 +7,10 @@
   apt: 
     state: latest
     name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 
-        'libtool', 'build-essential', 'pkg-config', 'ca-certificates']
+        'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 
+        'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev',
+        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm',
+        'libopus-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
 
 - name: install libtool-bin
   apt: 
@@ -27,20 +30,13 @@
     echo "deb-src http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" >> /etc/apt/sources.list.d/freeswitch.list
     exit 0
 
-- name: install freeswitch dependencies
-  apt:
-    install_recommends: no
-    update_cache: yes
-    state: build-dep
-    name: freeswitch
-
 - name: git configure
   shell: git config --global pull.rebase true
 
 - name: check out freeswitch code
   git: repo=https://freeswitch.org/stash/scm/fs/freeswitch.git
        dest={{freeswitch_sources_path}}
-       version=v1.8
+       version={{freeswitch_version}}
        depth=50
        accept_hostkey=yes
        force=yes
@@ -74,7 +70,11 @@
     - {src: "configure.ac.patch", dest: "{{freeswitch_sources_path}}/configure.ac"}
     - {src: "Makefile.am.patch", dest: "{{freeswitch_sources_path}}/Makefile.am"}
     - {src: "modules.conf.in.patch", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
-    - {src: "modules.conf.vanilla.xml.patch", dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"}
+
+- name: copy vanilla conf
+  copy:
+    src: modules.conf.vanilla.xml.lws
+    dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"
 
 - name: build libwebsockets
   shell: mkdir -p build && cd build && cmake .. && make && make install
@@ -101,7 +101,6 @@
     chdir: "{{freeswitch_sources_path}}"
     warn: False
   when: not build_with_grpc|bool
-
 
 - name: FreeSwitch make
   shell: make chdir={{freeswitch_sources_path}}

@@ -18,7 +18,11 @@
     - {src: "configure.ac.grpc.patch", dest: "{{freeswitch_sources_path}}/configure.ac"}
     - {src: "Makefile.am.grpc.patch", dest: "{{freeswitch_sources_path}}/Makefile.am"}
     - {src: "modules.conf.in.grpc.patch", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
-    - {src: "modules.conf.vanilla.xml.grpc.patch", dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"}
+
+- name: copy vanilla conf
+  copy:
+    src: modules.conf.vanilla.xml.grpc
+    dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"
 
 #- name: determine latest release to install
 #  command: curl -L https://grpc.io/release
