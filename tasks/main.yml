@@ -2,8 +2,9 @@
 
 - name: update apt-cache
   apt: update_cache=yes 
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-- name:  install build dependencies
+- name: Debian family - install build dependencies
   apt: 
     state: latest
     name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 
@@ -11,6 +12,53 @@
         'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev',
         'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm',
         'libopus-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: CentOS family - Setting up okey repository
+  yum:
+    name: "http://repo.okay.com.mx/centos/7/x86_64/release/okay-release-1-1.noarch.rpm"
+    state: present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: CentOS family - update yum
+  yum:
+    name: '*'
+    state: latest
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: CentOS family - install build dependencies
+  yum: 
+    state: latest
+    name: ['wget', 'git', 'autoconf', 'perl-Thread-Queue', 'automake', 'libtool', 'expat-devel', 'cmake', 'cmake3', 'yasm', 'zlib-devel', '@development-tools', 'libjpeg', 'libjpeg-devel', 'ncurses', 'ncurses-devel', 'gcc-c++', 'bison', 'bzip2', 'curl', 'curl-devel', 'git', 'make', 'openssl-devel', 'zlib', 'speex-devel', 'sqlite-devel', 'bc', 'libcurl-devel', 'opus-devel', 'libedit-devel', 'libtiff-devel', 'patch', 'libsndfile-devel']
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: CentOS family - Set cmake3 as default
+  alternatives:
+    link: /usr/local/bin/cmake
+    name: cmake
+    path: /usr/bin/cmake3
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: CentOS family - Set ctest3 as default
+  alternatives:
+    link: /usr/local/bin/ctest
+    name: ctest
+    path: /usr/bin/ctest3
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: CentOS family - Set cpack3 as default
+  alternatives:
+    link: /usr/local/bin/cpack
+    name: cpack
+    path: /usr/bin/cpack3
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: CentOS family - Set ccmake3 as default
+  alternatives:
+    link: /usr/local/bin/ccmake
+    name: ccmake
+    path: /usr/bin/ccmake3
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
 - name: install libtool-bin
   apt: 
@@ -23,12 +71,14 @@
   shell: wget  --no-check-certificate  -O - https://files.freeswitch.org/repo/deb/freeswitch-1.8/fsstretch-archive-keyring.asc | apt-key add -
   args:
     warn: False
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: update sources 
   shell: |
     echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" > /etc/apt/sources.list.d/freeswitch.list
     echo "deb-src http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" >> /etc/apt/sources.list.d/freeswitch.list
     exit 0
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: git configure
   shell: git config --global pull.rebase true
