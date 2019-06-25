@@ -88,14 +88,14 @@
 - name: bootstrap 
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
 
-- name: Freeswitch configuration
+- name: Freeswitch configuration (with grpc)
   shell: ./{{freeswitch_configure_command}} --with-grpc=yes
   args:
     chdir: "{{freeswitch_sources_path}}"
     warn: False
   when: build_with_grpc|bool
 
-- name: Freeswitch configuration
+- name: Freeswitch configuration (without grpc)
   shell: ./{{freeswitch_configure_command}}
   args:
     chdir: "{{freeswitch_sources_path}}"
@@ -145,6 +145,67 @@
   when: 
     - hostvars[inventory_hostname]['ansible_default_ipv6']
     - hostvars[inventory_hostname]['ansible_default_ipv6']['address']
+
+- name: set public IPs (aws)
+  block:
+  - name: set external_sip_ip
+    lineinfile:
+      path: /usr/local/freeswitch/conf/vars.xml
+      regexp: 'external_sip_ip=stun:stun.freeswitch.org'
+      line: <X-PRE-PROCESS cmd="exec-set" data="external_sip_ip=curl -s http://instance-data/latest/meta-data/public-ipv4"/>
+
+  - name: set external_rtp_ip
+    lineinfile:
+      path: /usr/local/freeswitch/conf/vars.xml
+      regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
+      line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s http://instance-data/latest/meta-data/public-ipv4"/>
+  when: cloud_provider == 'aws'
+
+- name: set public IPs (gcp)
+  block:
+  - name: set external_sip_ip
+    lineinfile:
+      path: /usr/local/freeswitch/conf/vars.xml
+      regexp: 'external_sip_ip=stun:stun.freeswitch.org'
+      line: <X-PRE-PROCESS cmd="exec-set" data="external_sip_ip=curl -s -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"/>
+
+  - name: set external_rtp_ip
+    lineinfile:
+      path: /usr/local/freeswitch/conf/vars.xml
+      regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
+      line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"/>
+  when: cloud_provider == 'gcp'
+
+- name: set public IPs (azure)
+  block:
+  - name: set external_sip_ip
+    lineinfile:
+      path: /usr/local/freeswitch/conf/vars.xml
+      regexp: 'external_sip_ip=stun:stun.freeswitch.org'
+      line: <X-PRE-PROCESS cmd="exec-set" data="external_sip_ip=curl -H Metadata:true http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text"/>
+
+  - name: set external_rtp_ip
+    lineinfile:
+      path: /usr/local/freeswitch/conf/vars.xml
+      regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
+      line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -H Metadata:true http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text"/>
+  when: cloud_provider == 'gcp'
+
+- name: bind sip and rtp to cloud IPs
+  block:
+  - name: bind sip
+    lineinfile:
+      path: /usr/local/freeswitch/conf/sip_profiles/mrf.xml
+      regexp: 'ext-sip-ip'
+      line: <param name="ext-sip-ip" value="$${external_sip_ip}"/>
+  
+  - name: bind rtp
+    lineinfile:
+      path: /usr/local/freeswitch/conf/sip_profiles/mrf.xml
+      regexp: 'ext-rtp-ip'
+      line: <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
+  
+  when: cloud_provider != 'none' and freeswitch_bind_cloud_ip|bool
 
 - name: unmask freeswitch service
   shell: systemctl unmask freeswitch

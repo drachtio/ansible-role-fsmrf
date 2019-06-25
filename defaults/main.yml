@@ -33,3 +33,5 @@ freeswitch_log_conf_template: ../templates/logfile.conf.xml
 build_with_grpc: false
 
 grpc_version: v1.20.0
+
+freeswitch_bind_cloud_ip: false

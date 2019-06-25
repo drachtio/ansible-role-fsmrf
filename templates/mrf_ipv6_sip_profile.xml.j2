@@ -12,11 +12,11 @@
       <param name="dtmf-type" value="rfc2833"/>
       
       <param name="inbound-late-negotiation" value="true"/>
-      <param name="rtp-ip" value="{{ hostvars[inventory_hostname]['ansible_default_ipv6']['address'] }}"/>
-      <param name="sip-ip" value="{{ hostvars[inventory_hostname]['ansible_default_ipv6']['address'] }}"/>
+      <param name="rtp-ip" value="$${local_ip_v6}"/>
+      <param name="sip-ip" value="$${local_ip_v6}"/>
       <param name="sip-port" value="{{freeswitch_sip_port}}"/>
-      <param name="ext-rtp-ip" value="auto-nat"/>
-      <param name="ext-sip-ip" value="auto-nat"/>
+      <param name="ext-rtp-ip" value="$${local_ip_v6}"/>
+      <param name="ext-sip-ip" value="$${local_ip_v6}"/>
       <param name="auth-calls" value="false"/>
       <param name="enable-timer" value="false"/>
       <param name="user-agent-string" value="drachtio MRF"/>

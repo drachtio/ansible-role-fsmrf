@@ -56,8 +56,7 @@
 - name: check out googleapis
   git: repo=https://github.com/googleapis/googleapis
        dest={{freeswitch_sources_path}}/libs/googleapis
-       version=master
-       depth=50
+       version=adsgen
        accept_hostkey=yes
        force=yes
 
