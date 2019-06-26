@@ -17,7 +17,7 @@ freeswitch_dtls_sip_port: 5081
 
 # add any addresses (in cidr format) that should be allowed to connect to event socket
 freeswitch_socket_acl:
-  - 127.0.0.1/32
+  - 0.0.0.0/0
 
 # freeswitch owner and group
 freeswitch_owner: freeswitch
