@@ -36,3 +36,6 @@ grpc_version: v1.20.0
 
 cloud_provider: none
 freeswitch_bind_cloud_ip: false
+
+rtp_start_port: 25000
+rtp_end_port: 39000

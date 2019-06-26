@@ -146,6 +146,18 @@
     - hostvars[inventory_hostname]['ansible_default_ipv6']
     - hostvars[inventory_hostname]['ansible_default_ipv6']['address']
 
+- name: change rtp-start-port
+  lineinfile:
+    path: /usr/local/freeswitch/conf/autoload_configs/switch.conf.xml
+    regexp: 'rtp-start-port'
+    line:  <param name="rtp-start-port" value="{{rtp_start_port}}"/
+
+- name: change rtp-end-port
+  lineinfile:
+    path: /usr/local/freeswitch/conf/autoload_configs/switch.conf.xml
+    regexp: 'rtp-end-port'
+    line:  <param name="rtp-end-port" value="{{rtp_end_port}}"/
+
 - name: set public IPs (aws)
   block:
   - name: set external_sip_ip
