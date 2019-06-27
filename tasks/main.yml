@@ -235,3 +235,14 @@
   template: src=freeswitch_log_rotation.j2 dest=/etc/cron.daily/freeswitch_log_rotation
 
 - file: path=/etc/cron.daily/freeswitch_log_rotation mode="a+x"
+
+- name: remove source code
+  file: 
+    path: {{item}}
+    state: absent
+  with_items:
+    - /usr/local/src/freeswitch
+    - /usr/local/src/drachtio-freeswitch-modules
+    - /usr/local/src/grpc
+    - /usr/local/src/
+  when: remove_source|bool

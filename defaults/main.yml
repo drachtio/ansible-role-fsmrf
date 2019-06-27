@@ -39,3 +39,5 @@ freeswitch_bind_cloud_ip: false
 
 rtp_start_port: 25000
 rtp_end_port: 39000
+
+remove_source: false
