@@ -23,3 +23,9 @@ script:
   - while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
   - ansible-playbook tests/test.yml -i tests/inventory --connection=local --become
   - kill %1
+after_failure:
+  - systemctl status freeswitch
+  - journalctl -xe
+  - cat /lib/systemd/system/freeswitch.service
+after_success:
+  - cat /lib/systemd/system/freeswitch.service

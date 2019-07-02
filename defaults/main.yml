@@ -41,3 +41,7 @@ rtp_start_port: 25000
 rtp_end_port: 39000
 
 remove_source: false
+
+mod_audio_fork_subprotocol: audiostream.drachtio.org
+mod_audio_fork_service_threads: 1
+mod_audio_fork_buffer_secs: 2

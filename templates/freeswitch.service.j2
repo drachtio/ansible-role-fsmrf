@@ -8,6 +8,9 @@ After=syslog.target network.target local-fs.target
 Type=forking
 PIDFile={{ freeswitch_path }}/run/freeswitch.pid
 EnvironmentFile=-/etc/default/freeswitch
+Environment="MOD_AUDIO_FORK_SUBPROTOCOL_NAME={{ mod_audio_fork_subprotocol }}"
+Environment="MOD_AUDIO_FORK_SERVICE_THREADS={{ mod_audio_fork_service_threads }}"
+Environment="MOD_AUDIO_FORK_BUFFER_SECS={{ mod_audio_fork_buffer_secs }}"
 Environment="LD_LIBRARY_PATH=/usr/local/lib"
 ExecStart={{ freeswitch_path }}/bin/freeswitch -nc -nonat
 TimeoutSec=45s
