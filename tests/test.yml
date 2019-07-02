@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
   remote_user: root
-  var:
+  vars:
     - remove_source: true
   roles:
     - ansible-role-fsmrf
