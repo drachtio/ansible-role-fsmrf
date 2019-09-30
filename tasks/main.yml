@@ -9,7 +9,7 @@
     name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 
         'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 
         'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev',
-        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm',
+        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged',
         'libopus-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
 
 - name: install libtool-bin
@@ -41,10 +41,17 @@
        accept_hostkey=yes
        force=yes
 
+- name: check out libfvad
+  git: repo=https://github.com/dpirch/libfvad.git
+       dest={{freeswitch_sources_path}}/libs/libfvad
+       depth=50
+       accept_hostkey=yes
+       force=yes
+
 - name: check out lws code
   git: repo=https://github.com/warmcat/libwebsockets.git
        dest={{freeswitch_sources_path}}/libs/libwebsockets
-       version=v3.1.0
+       version=v3.2.0
        depth=50
        accept_hostkey=yes
        force=yes
@@ -52,6 +59,7 @@
 - name: check out drachtio freeswitch modules
   git: repo=https://github.com/davehorton/drachtio-freeswitch-modules.git
        dest=/usr/local/src/drachtio-freeswitch-modules
+       version=v0.2.3
        depth=50
        accept_hostkey=yes
        force=yes
@@ -82,9 +90,14 @@
     chdir: "{{freeswitch_sources_path}}/libs/libwebsockets"
     warn: False
 
+- name: build libfvad
+  shell: autoreconf -i && ./configure && make && make install
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/libfvad"
+
 - include_tasks: grpc.yml 
   when: build_with_grpc|bool
-  
+
 - name: bootstrap 
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
 
@@ -223,7 +236,7 @@
   shell: systemctl unmask freeswitch
 
 - name: install freeswitch.service
-  template: src=freeswitch.service.j2 dest=/lib/systemd/system/freeswitch.service
+  template: src=freeswitch.service.j2 dest=/etc/systemd/system/freeswitch.service
 
 - name: reload systemctl
   shell: systemctl daemon-reload
