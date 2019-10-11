@@ -34,7 +34,7 @@
   shell: git config --global pull.rebase true
 
 - name: check out freeswitch code
-  git: repo=https://freeswitch.org/stash/scm/fs/freeswitch.git
+  git: repo=https://github.com/signalwire/freeswitch.git
        dest={{freeswitch_sources_path}}
        version={{freeswitch_version}}
        depth=50
