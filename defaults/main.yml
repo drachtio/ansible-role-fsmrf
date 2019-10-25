@@ -9,7 +9,7 @@ freeswitch_path: /usr/local/freeswitch/
 freeswitch_secret: ClueCon 
 
 # freeswitch version
-freeswitch_version: v1.8.5 
+freeswitch_version: v1.10.1
 
 # sip ports to listen on
 freeswitch_sip_port: 5080
@@ -24,7 +24,7 @@ freeswitch_owner: freeswitch
 freeswitch_group: daemon
 
 # freeswitch configure command - you can add option
-freeswitch_configure_command: configure CFLAGS="-D__alloca=alloca" --with-lws=yes
+freeswitch_configure_command: configure --with-lws=yes
 
 # freeswitch log configuration file template
 freeswitch_log_conf_template: ../templates/logfile.conf.xml
@@ -32,7 +32,7 @@ freeswitch_log_conf_template: ../templates/logfile.conf.xml
 # set to true if you want to build mod_google_tts, mod_google_transcribe, and mod_dialogflow
 build_with_grpc: false
 
-grpc_version: v1.20.0
+grpc_version: v1.24.2
 
 cloud_provider: none
 freeswitch_bind_cloud_ip: false

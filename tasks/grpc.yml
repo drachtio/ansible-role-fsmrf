@@ -54,9 +54,9 @@
     chdir: /usr/local/src/grpc
 
 - name: check out googleapis
-  git: repo=https://github.com/googleapis/googleapis
+  git: repo=https://github.com/davehorton/googleapis
        dest={{freeswitch_sources_path}}/libs/googleapis
-       version=adsgen
+       version=dialogflow-v2-support
        accept_hostkey=yes
        force=yes
 

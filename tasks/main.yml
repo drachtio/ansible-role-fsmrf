@@ -6,10 +6,10 @@
 - name:  install build dependencies
   apt: 
     state: latest
-    name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 
-        'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 
-        'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev',
-        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged',
+    name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 'libavformat-dev', 'liblua5.1-0-dev',
+        'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 'lsb-release',
+        'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev', 'libswscale-dev',
+        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged', 'libldns-dev',
         'libopus-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
 
 - name: install libtool-bin
@@ -20,21 +20,26 @@
   ignore_errors: yes          
 
 - name: install key for source code 
-  shell: wget  --no-check-certificate  -O - https://files.freeswitch.org/repo/deb/freeswitch-1.8/fsstretch-archive-keyring.asc | apt-key add -
+  shell: wget -O - https://files.freeswitch.org/repo/deb/debian-unstable/freeswitch_archive_g0.pub | apt-key add -
   args:
     warn: False
 
 - name: update sources 
   shell: |
-    echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" > /etc/apt/sources.list.d/freeswitch.list
-    echo "deb-src http://files.freeswitch.org/repo/deb/freeswitch-1.8/ stretch main" >> /etc/apt/sources.list.d/freeswitch.list
+    echo "deb http://files.freeswitch.org/repo/deb/debian-unstable/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list
+    echo "deb-src http://files.freeswitch.org/repo/deb/debian-unstable/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list
+    apt-get update
     exit 0
 
 - name: git configure
   shell: git config --global pull.rebase true
 
 - name: check out freeswitch code
+<<<<<<< HEAD
   git: repo=https://github.com/signalwire/freeswitch.git
+=======
+  git: repo=https://github.com/davehorton/freeswitch.git
+>>>>>>> buster-freeswitch-v1.10.1
        dest={{freeswitch_sources_path}}
        version={{freeswitch_version}}
        depth=50
@@ -59,7 +64,7 @@
 - name: check out drachtio freeswitch modules
   git: repo=https://github.com/davehorton/drachtio-freeswitch-modules.git
        dest=/usr/local/src/drachtio-freeswitch-modules
-       version=v0.2.3
+       version=master
        depth=50
        accept_hostkey=yes
        force=yes
@@ -171,66 +176,52 @@
     regexp: 'rtp-end-port'
     line:  <param name="rtp-end-port" value="{{rtp_end_port}}"/>
 
-- name: set public IPs (aws)
-  block:
-  - name: set external_sip_ip
-    lineinfile:
-      path: /usr/local/freeswitch/conf/vars.xml
-      regexp: 'external_sip_ip=stun:stun.freeswitch.org'
-      line: <X-PRE-PROCESS cmd="exec-set" data="external_sip_ip=curl -s http://instance-data/latest/meta-data/public-ipv4"/>
+- name: reorder codecs so PCMU is first and no video
+  lineinfile:
+    path: /usr/local/freeswitch/conf/vars.xml
+    regexp: 'global_codec_prefs=OPUS,G722,PCMU,PCMA,H264,VP'
+    line: <X-PRE-PROCESS cmd="set" data="global_codec_prefs=PCMU,PCMA,OPUS,G722"/>
 
-  - name: set external_rtp_ip
-    lineinfile:
-      path: /usr/local/freeswitch/conf/vars.xml
-      regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
-      line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s http://instance-data/latest/meta-data/public-ipv4"/>
+- name: reorder codecs so PCMU is first and no video
+  lineinfile:
+    path: /usr/local/freeswitch/conf/vars.xml
+    regexp: 'outbound_codec_prefs=OPUS,G722,PCMU,PCMA,H264,VP8'
+    line:  <X-PRE-PROCESS cmd="set" data="outbound_codec_prefs=PCMU,PCMA,OPUS,G722"/>
+
+- name: set-exec public IPs (aws)
+  lineinfile:
+    path: /usr/local/freeswitch/conf/vars.xml
+    regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
+    line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s http://instance-data/latest/meta-data/public-ipv4"/>
   when: cloud_provider == 'aws'
 
-- name: set public IPs (gcp)
-  block:
-  - name: set external_sip_ip
-    lineinfile:
-      path: /usr/local/freeswitch/conf/vars.xml
-      regexp: 'external_sip_ip=stun:stun.freeswitch.org'
-      line: <X-PRE-PROCESS cmd="exec-set" data="external_sip_ip=curl -s -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"/>
-
-  - name: set external_rtp_ip
-    lineinfile:
-      path: /usr/local/freeswitch/conf/vars.xml
-      regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
-      line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"/>
+- name: set-exec public IPs (gcp)
+  lineinfile:
+    path: /usr/local/freeswitch/conf/vars.xml
+    regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
+    line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s -H Metadata-Flavor:Google http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"/>
   when: cloud_provider == 'gcp'
 
-- name: set public IPs (azure)
-  block:
-  - name: set external_sip_ip
-    lineinfile:
-      path: /usr/local/freeswitch/conf/vars.xml
-      regexp: 'external_sip_ip=stun:stun.freeswitch.org'
-      line: <X-PRE-PROCESS cmd="exec-set" data="external_sip_ip=curl -H Metadata:true http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text"/>
+- name: set-exec public IPs (azure)
+  lineinfile:
+    path: /usr/local/freeswitch/conf/vars.xml
+    regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
+    line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -H Metadata:true http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text"/>
+  when: cloud_provider == 'azure'
 
-  - name: set external_rtp_ip
-    lineinfile:
-      path: /usr/local/freeswitch/conf/vars.xml
-      regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
-      line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -H Metadata:true http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2017-08-01&format=text"/>
-  when: cloud_provider == 'gcp'
+- name: set-exec public IPs (digital_ocean)
+  lineinfile:
+    path: /usr/local/freeswitch/conf/vars.xml
+    regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
+    line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address"/>
+  when: cloud_provider == 'digital_ocean'
 
-- name: bind sip and rtp to cloud IPs
-  block:
-  - name: bind sip
-    lineinfile:
-      path: /usr/local/freeswitch/conf/sip_profiles/mrf.xml
-      regexp: 'ext-sip-ip'
-      line: <param name="ext-sip-ip" value="$${external_sip_ip}"/>
-  
-  - name: bind rtp
-    lineinfile:
-      path: /usr/local/freeswitch/conf/sip_profiles/mrf.xml
-      regexp: 'ext-rtp-ip'
-      line: <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
-  
-  when: cloud_provider != 'none' and freeswitch_bind_cloud_ip|bool
+- name: bind rtp to cloud IPs
+  lineinfile:
+    path: /usr/local/freeswitch/conf/sip_profiles/mrf.xml
+    regexp: 'ext-rtp-ip'
+    line: <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
+  when: cloud_provider != 'none'
 
 - name: unmask freeswitch service
   shell: systemctl unmask freeswitch
