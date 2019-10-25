@@ -35,11 +35,7 @@
   shell: git config --global pull.rebase true
 
 - name: check out freeswitch code
-<<<<<<< HEAD
-  git: repo=https://github.com/signalwire/freeswitch.git
-=======
   git: repo=https://github.com/davehorton/freeswitch.git
->>>>>>> buster-freeswitch-v1.10.1
        dest={{freeswitch_sources_path}}
        version={{freeswitch_version}}
        depth=50
