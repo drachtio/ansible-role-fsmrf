@@ -7,7 +7,7 @@
   apt: 
     state: latest
     name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 'libavformat-dev', 'liblua5.1-0-dev',
-        'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 'lsb-release',
+        'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 'lsb-release', 'systemd-coredump', 'liblz4-tool',
         'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev', 'libswscale-dev',
         'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged', 'libldns-dev',
         'libopus-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
@@ -18,18 +18,6 @@
     state: latest
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   ignore_errors: yes          
-
-- name: install key for source code 
-  shell: wget -O - https://files.freeswitch.org/repo/deb/debian-unstable/freeswitch_archive_g0.pub | apt-key add -
-  args:
-    warn: False
-
-- name: update sources 
-  shell: |
-    echo "deb http://files.freeswitch.org/repo/deb/debian-unstable/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list
-    echo "deb-src http://files.freeswitch.org/repo/deb/debian-unstable/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list
-    apt-get update
-    exit 0
 
 - name: git configure
   shell: git config --global pull.rebase true
@@ -52,7 +40,7 @@
 - name: check out lws code
   git: repo=https://github.com/warmcat/libwebsockets.git
        dest={{freeswitch_sources_path}}/libs/libwebsockets
-       version=v3.2.0
+       version=v3.2-stable
        depth=50
        accept_hostkey=yes
        force=yes
