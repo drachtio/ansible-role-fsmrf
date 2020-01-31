@@ -10,7 +10,7 @@
         'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 'lsb-release', 'systemd-coredump', 'liblz4-tool',
         'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev', 'libswscale-dev',
         'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged', 'libldns-dev',
-        'libopus-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
+        'libopus-dev', 'libopusfile-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
 
 - name: install libtool-bin
   apt: 
@@ -67,6 +67,7 @@
     - {src: "configure.ac.patch", dest: "{{freeswitch_sources_path}}/configure.ac"}
     - {src: "Makefile.am.patch", dest: "{{freeswitch_sources_path}}/Makefile.am"}
     - {src: "modules.conf.in.patch", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
+    - {src: "mod_opusfile.c.patch", dest: "{{freeswitch_sources_path}}/src/mod/formats/mod_opusfile/mod_opusfile.c"}
 
 - name: copy vanilla conf
   copy:
