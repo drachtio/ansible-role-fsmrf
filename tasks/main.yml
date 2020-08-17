@@ -177,7 +177,7 @@
   lineinfile:
     path: /usr/local/freeswitch/conf/vars.xml
     regexp: 'external_rtp_ip=stun:stun.freeswitch.org'
-    line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s http://instance-data/latest/meta-data/public-ipv4"/>
+    line: <X-PRE-PROCESS cmd="exec-set" data="external_rtp_ip=curl -s http://169.254.169.254/latest/meta-data/public-ipv4"/>
   when: cloud_provider == 'aws'
 
 - name: set-exec public IPs (gcp)
