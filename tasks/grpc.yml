@@ -8,6 +8,7 @@
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_google_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_google_tts/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_dialogflow/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_aws_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
 
 - name: apply patches for grpc
   patch:
@@ -23,6 +24,23 @@
   copy:
     src: modules.conf.vanilla.xml.grpc
     dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"
+
+- name: check out aws-sdk-cpp
+  git:
+    repo: https://github.com/aws/aws-sdk-cpp.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+    version: "{{aws_sdk_version}}"
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+
+- name: build aws-sdk-cpp
+   shell: |
+    mkdir -p build && cd build
+    cmake .. -DBUILD_ONLY=transcribestreaming -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF
+    make
+   args:
+     chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
 
 #- name: determine latest release to install
 #  command: curl -L https://grpc.io/release
