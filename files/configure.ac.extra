@@ -1563,25 +1563,13 @@ else
   AM_CONDITIONAL([HAVE_LWS],[false])
 fi
 
-dnl DH: Added for including aws lex
-AC_ARG_WITH(lex,
-  [AS_HELP_STRING([--with-lex],
-    [enable support for AWS Lex])],
-  [with_lws="$withval"],
-  [with_lws="no"])
-if test "$with_lex" = "yes"; then
-  AM_CONDITIONAL([HAVE_LEX],[false])
-else
-  AM_CONDITIONAL([HAVE_LEX],[false])
-fi
-
 dnl DH: Added for including google protobuf libs
-+AC_ARG_WITH(grpc,
-   [AS_HELP_STRING([--with-grpc],
-     [enable support for google rpc (libgrpc++ and libgrpc)])],
-   [with_grpc="$withval"],
-   [with_grpc="no"])
-if test "$with_grpc" = "yes"; then
++AC_ARG_WITH(extra,
+   [AS_HELP_STRING([--with-extra],
+     [enable support for extra modules which require google rpc (libgrpc++ and libgrpc)])],
+   [with_extra="$withval"],
+   [with_extra="no"])
+if test "$with_extra" = "yes"; then
   PKG_CHECK_MODULES([GRPC], [grpc++ grpc], [
     AM_CONDITIONAL([HAVE_GRPC],[true])], [
     AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_GRPC],[false])])
@@ -1884,13 +1872,13 @@ AC_CONFIG_FILES([Makefile
 		src/Makefile
 		src/mod/Makefile
 		src/mod/applications/mod_audio_fork/Makefile
-		src/mod/applications/mod_aws_lex/Makefile
+		src/mod/applications/mod_aws_transcribe/Makefile
 		src/mod/applications/mod_google_tts/Makefile
 		src/mod/applications/mod_google_transcribe/Makefile
 		src/mod/applications/mod_dialogflow/Makefile
 		src/mod/applications/mod_abstraction/Makefile
 		src/mod/applications/mod_avmd/Makefile
-		src/mod/applications/mod_bert/Makefile
+		src/mod/applications/mod_bert/Makefile:qd
 		src/mod/applications/mod_blacklist/Makefile
 		src/mod/applications/mod_callcenter/Makefile
 		src/mod/applications/mod_cidlookup/Makefile
@@ -2075,9 +2063,9 @@ AC_CONFIG_FILES([Makefile
 		build/getg729.sh
 		build/freeswitch.pc
 		build/modmake.rules
-                libs/esl/Makefile
-                libs/esl/perl/Makefile
-                libs/esl/php/Makefile
+    libs/esl/Makefile
+    libs/esl/perl/Makefile
+    libs/esl/php/Makefile
 		libs/xmlrpc-c/include/xmlrpc-c/config.h
 		libs/xmlrpc-c/xmlrpc_config.h
 		libs/xmlrpc-c/config.mk
