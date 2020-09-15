@@ -64,10 +64,19 @@
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
   loop:
-    - {src: "configure.ac.patch", dest: "{{freeswitch_sources_path}}/configure.ac"}
-    - {src: "Makefile.am.patch", dest: "{{freeswitch_sources_path}}/Makefile.am"}
-    - {src: "modules.conf.in.patch", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
     - {src: "mod_opusfile.c.patch", dest: "{{freeswitch_sources_path}}/src/mod/formats/mod_opusfile/mod_opusfile.c"}
+
+
+- name: copy files to build lws and mod_audio_fork
+  copy:
+    remote_src: no
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {src: "configure.ac.lws", dest: "{{freeswitch_sources_path}}/configure.ac"}
+    - {src: "Makefile.am.lws", dest: "{{freeswitch_sources_path}}/Makefile.am"}
+    - {src: "modules.conf.in.lws", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
+
 
 - name: copy vanilla conf
   copy:
