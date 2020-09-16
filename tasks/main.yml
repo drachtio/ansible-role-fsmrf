@@ -68,6 +68,14 @@
     - {src: "modules.conf.in.lws", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
     - {src: "modules.conf.vanilla.xml.lws", dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"}
 
+- name: patch mod_opusfile
+  patch:
+    remote_src: no
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {src: "mod_opusfile.c.patch", dest: "{{freeswitch_sources_path}}/src/mod/formats/mod_opusfile/mod_opusfile.c"}
+
 - name: build libwebsockets
   shell: mkdir -p build && cd build && cmake .. && make && make install
   args:

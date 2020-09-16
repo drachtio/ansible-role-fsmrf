@@ -10,10 +10,11 @@
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_dialogflow/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_aws_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
 
-- name: copy Makefile.am, configure.ac etc into place
+- name: copy Makefile.am, configure.ac etc into place 
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest}}"
+    remote_src: no
   loop:
     - {src: "configure.ac.extra", dest: "{{freeswitch_sources_path}}/configure.ac"}
     - {src: "Makefile.am.extra", dest: "{{freeswitch_sources_path}}/Makefile.am"}
