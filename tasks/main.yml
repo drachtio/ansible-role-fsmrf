@@ -101,7 +101,7 @@
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
 
 - name: Freeswitch configuration (with grpc)
-  shell: ./{{freeswitch_configure_command}} --with-grpc=yes
+  shell: ./{{freeswitch_configure_command}} --with-extra=yes
   args:
     chdir: "{{freeswitch_sources_path}}"
     warn: False
