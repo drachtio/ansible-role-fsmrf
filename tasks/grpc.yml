@@ -10,19 +10,19 @@
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_dialogflow/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_aws_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
 
-- name: apply patches for grpc
-  patch:
+- name: copy files for grpc and aws transcribe
+  copy:
     remote_src: no
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
   loop:
-    - {src: "configure.ac.grpc.patch", dest: "{{freeswitch_sources_path}}/configure.ac"}
-    - {src: "Makefile.am.grpc.patch", dest: "{{freeswitch_sources_path}}/Makefile.am"}
-    - {src: "modules.conf.in.grpc.patch", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
+    - {src: "configure.ac.extra", dest: "{{freeswitch_sources_path}}/configure.ac"}
+    - {src: "Makefile.am.extra", dest: "{{freeswitch_sources_path}}/Makefile.am"}
+    - {src: "modules.conf.in.extra", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
 
 - name: copy vanilla conf
   copy:
-    src: modules.conf.vanilla.xml.grpc
+    src: modules.conf.vanilla.xml.extra
     dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"
 
 - name: check out aws-sdk-cpp
@@ -35,12 +35,12 @@
     force: yes
 
 - name: build aws-sdk-cpp
-   shell: |
+  shell: |
     mkdir -p build && cd build
     cmake .. -DBUILD_ONLY=transcribestreaming -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF
     make
-   args:
-     chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
 
 #- name: determine latest release to install
 #  command: curl -L https://grpc.io/release
