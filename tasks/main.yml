@@ -58,21 +58,15 @@
   args:
     warn: False
 
-- name: apply patches to build lws and mod_audio_fork
-  patch:
-    remote_src: no
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  loop:
-    - {src: "configure.ac.patch", dest: "{{freeswitch_sources_path}}/configure.ac"}
-    - {src: "Makefile.am.patch", dest: "{{freeswitch_sources_path}}/Makefile.am"}
-    - {src: "modules.conf.in.patch", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
-    - {src: "mod_opusfile.c.patch", dest: "{{freeswitch_sources_path}}/src/mod/formats/mod_opusfile/mod_opusfile.c"}
-
-- name: copy vanilla conf
+- name: copy Makefile.am, configure.ac etc into place
   copy:
-    src: modules.conf.vanilla.xml.lws
-    dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest}}"
+  loop:
+    - {src: "configure.ac.lws", dest: "{{freeswitch_sources_path}}/configure.ac"}
+    - {src: "Makefile.am.lws", dest: "{{freeswitch_sources_path}}/Makefile.am"}
+    - {src: "modules.conf.in.lws", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
+    - {src: "modules.conf.vanilla.xml.lws", dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"}
 
 - name: build libwebsockets
   shell: mkdir -p build && cd build && cmake .. && make && make install
@@ -85,25 +79,25 @@
   args:
     chdir: "{{freeswitch_sources_path}}/libs/libfvad"
 
-- include_tasks: grpc.yml 
-  when: build_with_grpc|bool
+- include_tasks: extra.yml 
+  when: build_with_extra|bool
 
 - name: bootstrap 
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
 
-- name: Freeswitch configuration (with grpc)
-  shell: ./{{freeswitch_configure_command}} --with-grpc=yes
+- name: Freeswitch configuration (with extra modules)
+  shell: ./{{freeswitch_configure_command}} --with-extra=yes
   args:
     chdir: "{{freeswitch_sources_path}}"
     warn: False
-  when: build_with_grpc|bool
+  when: build_with_extra|bool
 
-- name: Freeswitch configuration (without grpc)
+- name: Freeswitch configuration (without extra modules)
   shell: ./{{freeswitch_configure_command}}
   args:
     chdir: "{{freeswitch_sources_path}}"
     warn: False
-  when: not build_with_grpc|bool
+  when: not build_with_extra|bool
 
 - name: FreeSwitch make
   shell: make chdir={{freeswitch_sources_path}}

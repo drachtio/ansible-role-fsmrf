@@ -29,8 +29,8 @@ freeswitch_configure_command: configure --with-lws=yes
 # freeswitch log configuration file template
 freeswitch_log_conf_template: ../templates/logfile.conf.xml
 
-# set to true if you want to build mod_google_tts, mod_google_transcribe, and mod_dialogflow
-build_with_grpc: false
+# set to true if you want to build mod_google_tts, mod_google_transcribe, mod_dialogflow, and mod_aws_transcribe
+build_with_extra: false
 
 grpc_version: v1.24.2
 aws_sdk_version: master
