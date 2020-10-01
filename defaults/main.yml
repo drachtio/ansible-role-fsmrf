@@ -2,6 +2,9 @@
 # path to the FreeSwitch source directory
 freeswitch_sources_path: /usr/local/src/freeswitch/
 
+spandsp_version: master
+sofia_version: master
+
 # path to the FreeSwitch install directory
 freeswitch_path: /usr/local/freeswitch/
 
@@ -9,7 +12,7 @@ freeswitch_path: /usr/local/freeswitch/
 freeswitch_secret: ClueCon 
 
 # freeswitch version
-freeswitch_version: v1.10.1
+freeswitch_version: v1.10.5
 
 # sip ports to listen on
 freeswitch_sip_port: 5080

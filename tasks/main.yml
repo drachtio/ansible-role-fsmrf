@@ -8,8 +8,8 @@
     state: latest
     name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 'libavformat-dev', 'liblua5.1-0-dev',
         'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 'lsb-release', 'systemd-coredump', 'liblz4-tool',
-        'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev', 'libswscale-dev',
-        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged', 'libldns-dev',
+        'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev', 'libswscale-dev', 'php-cli',
+        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged', 'libldns-dev', 'uuid-dev',
         'libopus-dev', 'libopusfile-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
 
 - name: install libtool-bin
@@ -23,9 +23,25 @@
   shell: git config --global pull.rebase true
 
 - name: check out freeswitch code
-  git: repo=https://github.com/davehorton/freeswitch.git
+  git: repo=https://github.com/signalwire/freeswitch.git
        dest={{freeswitch_sources_path}}
        version={{freeswitch_version}}
+       depth=50
+       accept_hostkey=yes
+       force=yes
+
+- name: check out spandsp
+  git: repo=https://github.com/freeswitch/spandsp.git
+       dest={{freeswitch_sources_path}}/libs/spandsp
+       version={{spandsp_version}}
+       depth=50
+       accept_hostkey=yes
+       force=yes
+
+- name: check out sofia
+  git: repo=https://github.com/freeswitch/sofia-sip.git
+       dest={{freeswitch_sources_path}}/libs/sofia-sip
+       version={{sofia_version}}
        depth=50
        accept_hostkey=yes
        force=yes
@@ -68,13 +84,13 @@
     - {src: "modules.conf.in.lws", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
     - {src: "modules.conf.vanilla.xml.lws", dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"}
 
-- name: patch mod_opusfile
-  patch:
-    remote_src: no
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  loop:
-    - {src: "mod_opusfile.c.patch", dest: "{{freeswitch_sources_path}}/src/mod/formats/mod_opusfile/mod_opusfile.c"}
+#- name: patch mod_opusfile
+#  patch:
+#    remote_src: no
+#    src: "{{ item.src }}"
+#    dest: "{{ item.dest }}"
+#  loop:
+#    - {src: "mod_opusfile.c.patch", dest: "{{freeswitch_sources_path}}/src/mod/formats/mod_opusfile/mod_opusfile.c"}
 
 - name: build libwebsockets
   shell: mkdir -p build && cd build && cmake .. && make && make install
@@ -86,6 +102,16 @@
   shell: autoreconf -i && ./configure && make && make install
   args:
     chdir: "{{freeswitch_sources_path}}/libs/libfvad"
+
+- name: build spandsp
+  shell: ./bootstrap.sh && ./configure && make && make install
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/spandsp"
+
+- name: build sofia
+  shell: ./bootstrap.sh && ./configure && make && make install
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/sofia-sip"
 
 - include_tasks: extra.yml 
   when: build_with_extra|bool
