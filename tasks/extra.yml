@@ -30,28 +30,48 @@
     accept_hostkey: yes
     force: yes
 
-- name: build aws-sdk-cpp
+- name: check out aws-c-common
+  git:
+    repo: https://github.com/awslabs/aws-c-common.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-c-common"
+    version: main
+    accept_hostkey: yes
+    force: yes
+
+- name: check out aws-checksums
+  git:
+    repo: https://github.com/awslabs/aws-checksums.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-checksums"
+    version: main
+    accept_hostkey: yes
+    force: yes
+
+- name: build aws-c-common
   shell: |
     mkdir -p build && cd build
-    cmake .. -DBUILD_ONLY=transcribestreaming -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF
-    make
+    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter"
+    make -j 4 && make install
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/aws-c-common"
+    warn: false
+
+- name: build aws-sdk-cpp (transcribestreaming and lex TBD)
+  shell: |
+    mkdir -p build && cd build
+    cmake .. -DBUILD_ONLY=transcribestreaming -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter"
+    make -j 4 && make install
   args:
     chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
     warn: false
 
-#- name: determine latest release to install
-#  command: curl -L https://grpc.io/release
-#  args:
-#    warn: false
-#  register: latest_grpc_release
-
 - name: check out grpc
-  git: repo=https://github.com/grpc/grpc
-    dest=/usr/local/src/grpc
-    version={{grpc_version}}
-    depth=50
-    accept_hostkey=yes
-    force=yes
+  git: 
+    repo: https://github.com/grpc/grpc
+    dest: /usr/local/src/grpc
+    version: "{{grpc_version}}"
+    depth: 50
+    accept_hostkey: yes
+    force: yes
             
 - name: update submodules
   shell: git submodule update --init --recursive
@@ -59,12 +79,12 @@
     chdir: /usr/local/src/grpc
 
 - name: build grpc protobuf
-  shell: ./autogen.sh && ./configure && make install 
+  shell: ./autogen.sh && ./configure && make -j 4 install 
   args:
     chdir: /usr/local/src/grpc/third_party/protobuf
 
 - name: build grpc
-  shell: export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && make && make install 
+  shell: export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && make -j 4 && make install 
   args:
     chdir: /usr/local/src/grpc
 
@@ -76,5 +96,5 @@
        force=yes
 
 - name: build googleapis
-  shell: LANGUAGE=cpp make chdir={{freeswitch_sources_path}}/libs/googleapis
+  shell: LANGUAGE=cpp make -j 4 chdir={{freeswitch_sources_path}}/libs/googleapis
 
