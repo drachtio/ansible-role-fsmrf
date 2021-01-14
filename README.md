@@ -2,10 +2,11 @@
 
 This is an ansible role for building a [Freeswitch](https://freeswitch.org/) v1.8 that is configured to work with the [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf) module.  The [mod_audio_fork](https://github.com/davehorton/drachtio-freeswitch-modules/blob/master/modules/mod_audio_fork/README.md) module is built and installed as part of this role.
 
-Additionally, by setting the `build_with_grpc` variable to true, these additional modules will be built and included:
+Additionally, by setting the `build_with_extra` variable to true, these additional modules will be built and included:
 - [mod_google_transcribe](https://github.com/davehorton/drachtio-freeswitch-modules/tree/master/modules/mod_google_transcribe)
 - [mod_google_tts](https://github.com/davehorton/drachtio-freeswitch-modules/tree/master/modules/mod_google_tts)
 - [mod_dialogflow](https://github.com/davehorton/drachtio-freeswitch-modules/tree/master/modules/mod_dialogflow)
+- [mod_aws_transcribe](https://github.com/davehorton/drachtio-freeswitch-modules/tree/master/modules/mod_aws_transcribe)
 
 ## Freeswitch modules
 Because this is designed for use as a media server via [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf), a very limited list of modules are built and installed:
@@ -39,7 +40,7 @@ Because this is designed for use as a media server via [drachtio-fsmrf](https://
 Available variables are listed below, along with default values (see defaults/main.yml):
 
 ```
-build_with_grpc: false
+build_with_extra: false
 ```
 set to true if you want to build with the google grpc library and then build related google modules as described above
 
@@ -97,7 +98,7 @@ freeswitch log configuration file template
 - hosts: all
   become: yes
   vars_prompt:
-    - name: "build_with_grpc"
+    - name: "build_with_extra"
       prompt: "Include the grpc modules (mod_google_transcribe, mod_google_tts, mod_dialogflow)?"
       private: no
       default: false
