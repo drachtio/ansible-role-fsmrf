@@ -348,6 +348,8 @@ libs/googleapis/gens/google/longrunning/operations.grpc.pb.cc \
 libs/googleapis/gens/google/longrunning/operations.pb.cc \
 libs/googleapis/gens/google/cloud/speech/v1p1beta1/cloud_speech.pb.cc \
 libs/googleapis/gens/google/cloud/speech/v1p1beta1/cloud_speech.grpc.pb.cc \
+libs/googleapis/gens/google/cloud/speech/v1p1beta1/resource.pb.cc \
+libs/googleapis/gens/google/cloud/speech/v1p1beta1/resource.grpc.pb.cc \
 libs/googleapis/gens/google/cloud/texttospeech/v1/cloud_tts.pb.cc \
 libs/googleapis/gens/google/cloud/texttospeech/v1/cloud_tts.grpc.pb.cc \
 libs/googleapis/gens/google/logging/type/http_request.grpc.pb.cc  \

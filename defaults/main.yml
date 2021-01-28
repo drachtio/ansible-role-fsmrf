@@ -36,6 +36,8 @@ freeswitch_log_conf_template: ../templates/logfile.conf.xml
 build_with_extra: false
 
 grpc_version: v1.24.2
+googleapis_version: v1p1beta1-speech
+
 aws_sdk_version: 1.8.129
 
 cloud_provider: none

@@ -92,7 +92,7 @@
 - name: check out googleapis
   git: repo=https://github.com/davehorton/googleapis
        dest={{freeswitch_sources_path}}/libs/googleapis
-       version=dialogflow-v2-support
+       version="{{googleapis_version}}"
        accept_hostkey=yes
        force=yes
 
