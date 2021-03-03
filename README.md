@@ -1,6 +1,6 @@
 # ansible-role-fsmrf [![Build Status](https://secure.travis-ci.org/davehorton/ansible-role-fsmrf.png)](http://travis-ci.org/davehorton/ansible-role-fsmrf)
 
-This is an ansible role for building a [Freeswitch](https://freeswitch.org/) v1.8 that is configured to work with the [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf) module.  The [mod_audio_fork](https://github.com/davehorton/drachtio-freeswitch-modules/blob/master/modules/mod_audio_fork/README.md) module is built and installed as part of this role.
+This is an ansible role for building a [Freeswitch](https://freeswitch.org/) v1.10.5 that is configured to work with the [drachtio-fsmrf](https://github.com/davehorton/drachtio-fsmrf) module.  The [mod_audio_fork](https://github.com/davehorton/drachtio-freeswitch-modules/blob/master/modules/mod_audio_fork/README.md) module is built and installed as part of this role.
 
 Additionally, by setting the `build_with_extra` variable to true, these additional modules will be built and included:
 - [mod_google_transcribe](https://github.com/davehorton/drachtio-freeswitch-modules/tree/master/modules/mod_google_transcribe)
