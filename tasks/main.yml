@@ -60,7 +60,7 @@
   git: 
     repo: https://github.com/warmcat/libwebsockets.git
     dest: "{{freeswitch_sources_path}}/libs/libwebsockets"
-    version: v3.2-stable
+    version: v3.2.3
     depth: 50
     accept_hostkey: yes
     force: yes
