@@ -35,10 +35,11 @@ freeswitch_log_conf_template: ../templates/logfile.conf.xml
 # set to true if you want to build mod_google_tts, mod_google_transcribe, mod_dialogflow, and mod_aws_transcribe
 build_with_extra: false
 
-grpc_version: v1.24.2
-googleapis_version: v1p1beta1-speech
+grpc_version: c66d2cc
+googleapis_version: e9da6f8b469c52b83f900e820be30762e9e05c57
 
 aws_sdk_version: 1.8.129
+lws_version: v3.2.3
 
 cloud_provider: none
 freeswitch_bind_cloud_ip: false

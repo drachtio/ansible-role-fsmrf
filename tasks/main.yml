@@ -60,16 +60,16 @@
   git: 
     repo: https://github.com/warmcat/libwebsockets.git
     dest: "{{freeswitch_sources_path}}/libs/libwebsockets"
-    version: v3.2.3
+    version: "{{lws_version}}"
     depth: 50
     accept_hostkey: yes
     force: yes
 
 - name: check out drachtio freeswitch modules
   git: 
-    repo: https://github.com/davehorton/drachtio-freeswitch-modules.git
+    repo: https://github.com/drachtio/drachtio-freeswitch-modules.git
     dest: /usr/local/src/drachtio-freeswitch-modules
-    version: master
+    version: main
     depth: 50
     accept_hostkey: yes
     force: yes

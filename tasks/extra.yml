@@ -79,23 +79,31 @@
   args:
     chdir: /usr/local/src/grpc
 
-- name: build grpc protobuf
-  shell: ./autogen.sh && ./configure && make -j 4 install 
-  args:
-    chdir: /usr/local/src/grpc/third_party/protobuf
-
 - name: build grpc
-  shell: export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH && make -j 4 && make install 
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    git submodule update --init --recursive
+    mkdir -p cmake/build
+    cd cmake/build
+    cmake -DBUILD_SHARED_LIBS=ON -DgRPC_SSL_PROVIDER=package -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ../..
+    make -j 4
+    make install
   args:
     chdir: /usr/local/src/grpc
 
 - name: check out googleapis
-  git: repo=https://github.com/davehorton/googleapis
+  git: repo=https://github.com/googleapis/googleapis
        dest={{freeswitch_sources_path}}/libs/googleapis
        version="{{googleapis_version}}"
        accept_hostkey=yes
        force=yes
 
 - name: build googleapis
-  shell: LANGUAGE=cpp make -j 4 chdir={{freeswitch_sources_path}}/libs/googleapis
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    sed -i 's/\$fields/fields/' google/maps/routes/v1/route_service.proto
+    sed -i 's/\$fields/fields/' google/maps/routes/v1alpha/route_service.proto
+    LANGUAGE=cpp make -j 4
+  args:
+    chdir: /usr/local/src/freeswitch/libs/googleapis
 
