@@ -2,7 +2,7 @@
 # path to the FreeSwitch source directory
 freeswitch_sources_path: /usr/local/src/freeswitch/
 
-spandsp_version: master
+spandsp_version: 64f4d2a
 sofia_version: master
 
 # path to the FreeSwitch install directory
