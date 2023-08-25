@@ -2,6 +2,8 @@
 # path to the FreeSwitch source directory
 freeswitch_sources_path: /usr/local/src/freeswitch/
 
+drachtio_modules_version: v0.8.0
+
 spandsp_version: 0d2e6ac
 sofia_version: master
 

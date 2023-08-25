@@ -56,6 +56,12 @@
     accept_hostkey: yes
     force: yes
 
+- name: patch libfvad configure.ac on Debian 12
+  copy: 
+    src: "configure.ac.libfvad"
+    dest: "{{freeswitch_sources_path}}/libs/libfvad/configure.ac"
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == '12'
+
 - name: check out nuance protobufs
   git: 
     repo: https://github.com/drachtio/nuance-asr-grpc-api.git
@@ -96,7 +102,7 @@
   git: 
     repo: https://github.com/drachtio/drachtio-freeswitch-modules.git
     dest: /usr/local/src/drachtio-freeswitch-modules
-    version: update-lws
+    version: {{drachtio_modules_version}}
     depth: 50
     accept_hostkey: yes
     force: yes
@@ -204,18 +210,32 @@
 - name: build aws-c-common
   shell: |
     mkdir -p build && cd build
-    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter" 
+    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error" 
     make -j 4 && make install
   args:
     chdir: "{{freeswitch_sources_path}}/libs/aws-c-common"
 
 - name: build aws-sdk-cpp (transcribestreaming and lexv2-runtime)
-  shell: |
-    mkdir -p build && cd build
-    cmake .. -DBUILD_ONLY="lexv2-runtime;transcribestreaming" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter" 
-    make -j 4 && make install
-  args:
-    chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+  block:
+  - name: patch compiler_settings.cmake and run build
+    shell: |
+      sed -i 's/list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")/list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-pedantic" "-Wextra")/' /usr/local/src/freeswitch/libs/aws-sdk-cpp/cmake/compiler_settings.cmake
+      mkdir -p build && cd build
+      cmake .. -DBUILD_ONLY="lexv2-runtime;transcribestreaming" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error" 
+      sed -i 's/uint8_t arr\[16\];/uint8_t arr\[16\] = {0};/g' /usr/local/src/freeswitch/libs/aws-sdk-cpp/build/.deps/build/src/AwsCCommon/tests/byte_buf_test.c
+      sed -i 's/char filename_array\[64\];/char filename_array\[64\] = {0};/g' /usr/local/src/freeswitch/libs/aws-sdk-cpp/build/.deps/build/src/AwsCCommon/tests/logging/logging_test_utilities.c
+      make -j 4 && make install
+    args:
+      chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+    register: shell_output
+  rescue:
+    - name: attempt rebuild (necessary on Debian 12 for some reason)
+      shell: |
+        mkdir -p build && cd build
+        cmake .. -DBUILD_ONLY="lexv2-runtime;transcribestreaming" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error" 
+        make -j 4 && make install
+      args:
+        chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
 
 - name: check out grpc
   git: 
