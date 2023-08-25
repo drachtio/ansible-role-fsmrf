@@ -97,6 +97,14 @@
   loop:
     - {src: "switch_rtp.c.patch", dest: "{{freeswitch_sources_path}}/src/switch_rtp.c"}
 
+- name: patch mod_spandsp_dsp.c to fix missing args in v18_init func
+  patch:
+    remote_src: no
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {src: "mod_spandsp_dsp.c.patch", dest: "{{freeswitch_sources_path}}/src/mod/applications/mod_spandsp/mod_spandsp_dsp.c"}
+
 - name: build libwebsockets
   shell: mkdir -p build && cd build && cmake .. && make -j 4 && make install
   args:
