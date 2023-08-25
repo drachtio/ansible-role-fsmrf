@@ -102,7 +102,7 @@
   git: 
     repo: https://github.com/drachtio/drachtio-freeswitch-modules.git
     dest: /usr/local/src/drachtio-freeswitch-modules
-    version: {{drachtio_modules_version}}
+    version: "{{drachtio_modules_version}}"
     depth: 50
     accept_hostkey: yes
     force: yes
