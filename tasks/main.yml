@@ -7,11 +7,11 @@
 - name:  Debian family - install build dependencies
   apt: 
     state: latest
-    name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 'libavformat-dev', 'liblua5.1-0-dev',
-        'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 'lsb-release', 'systemd-coredump', 'liblz4-tool',
-        'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev', 'libswscale-dev', 'php-cli',
-        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged', 'libldns-dev', 'uuid-dev',
-        'libopus-dev', 'libopusfile-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev']
+    name: ['curl', 'gnupg2', 'wget', 'git', 'cmake', 'automake', 'autoconf', 'libavformat-dev', 'liblua5.1-0-dev', 'libavfilter-dev', 'libavcodec-dev',
+        'libtool', 'build-essential', 'pkg-config', 'ca-certificates', 'libssl-dev', 'lsb-release', 'systemd-coredump', 'liblz4-tool', 'libswresample-dev',
+        'libz-dev', 'libjpeg-dev', 'libsqlite3-dev', 'libcurl4-openssl-dev', 'libpcre3-dev', 'libswscale-dev', 'php-cli', 'libre2-dev',
+        'libspeex-dev', 'libspeexdsp-dev', 'libedit-dev', 'libtiff-dev', 'yasm', 'haveged', 'libldns-dev', 'uuid-dev', 'libsndfile1-dev',
+        'libopus-dev', 'libopusfile-dev', 'libsndfile-dev', 'libshout3-dev', 'libmpg123-dev', 'libmp3lame-dev', 'htop']
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: install libtool-bin
@@ -56,6 +56,33 @@
     accept_hostkey: yes
     force: yes
 
+- name: check out nuance protobufs
+  git: 
+    repo: https://github.com/drachtio/nuance-asr-grpc-api.git
+    dest: "{{freeswitch_sources_path}}/libs/nuance-asr-grpc-api"
+    version: main
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+
+- name: check out nvidia protobufs
+  git: 
+    repo: https://github.com/drachtio/riva-asr-grpc-api.git
+    dest: "{{freeswitch_sources_path}}/libs/riva-asr-grpc-api"
+    version: main
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+
+- name: check out soniox protobufs
+  git: 
+    repo: https://github.com/drachtio/soniox-asr-grpc-api.git
+    dest: "{{freeswitch_sources_path}}/libs/soniox-asr-grpc-api"
+    version: main
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+
 - name: check out lws code
   git: 
     repo: https://github.com/warmcat/libwebsockets.git
@@ -69,25 +96,32 @@
   git: 
     repo: https://github.com/drachtio/drachtio-freeswitch-modules.git
     dest: /usr/local/src/drachtio-freeswitch-modules
-    version: main
+    version: update-lws
     depth: 50
     accept_hostkey: yes
     force: yes
-
-- name: copy mod_audio_fork into place
-  shell: cp -r /usr/local/src/drachtio-freeswitch-modules/modules/mod_audio_fork {{freeswitch_sources_path}}/src/mod/applications/mod_audio_fork
-  args:
-    warn: False
 
 - name: copy Makefile.am, configure.ac etc into place
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest}}"
   loop:
-    - {src: "configure.ac.lws", dest: "{{freeswitch_sources_path}}/configure.ac"}
-    - {src: "Makefile.am.lws", dest: "{{freeswitch_sources_path}}/Makefile.am"}
-    - {src: "modules.conf.in.lws", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
-    - {src: "modules.conf.vanilla.xml.lws", dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"}
+    - {src: "configure.ac", dest: "{{freeswitch_sources_path}}/configure.ac"}
+    - {src: "Makefile.am", dest: "{{freeswitch_sources_path}}/Makefile.am"}
+    - {src: "modules.conf.in", dest: "{{freeswitch_sources_path}}/build/modules.conf.in"}
+    - {src: "modules.conf.vanilla.xml", dest: "{{freeswitch_sources_path}}/conf/vanilla/autoload_configs/modules.conf.xml"}
+    - {src: "SpeechSDK-Linux-1.31.0.tar.gz", dest: "/tmp"}
+
+- name: install Azure SpeechSDK
+  shell: |
+    tar xvfz SpeechSDK-Linux-1.31.0.tar.gz
+    cd SpeechSDK-Linux-1.31.0
+    cp -r include /usr/local/include/MicrosoftSpeechSDK
+    cp -r lib/ /usr/local/lib/MicrosoftSpeechSDK
+    cp /usr/local/lib/MicrosoftSpeechSDK/x64/libMicrosoft.*.so /usr/local/lib/
+    rm -Rf /tmp/SpeechSDK-Linux-1.31.0*
+  args:
+    chdir: "/tmp"
 
 - name: patch switch_rtp.c to disable the flushing of rtp packets feature 
   patch:
@@ -97,11 +131,18 @@
   loop:
     - {src: "switch_rtp.c.patch", dest: "{{freeswitch_sources_path}}/src/switch_rtp.c"}
 
+- name: patch switch_core_media.c 
+  patch:
+    remote_src: no
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - {src: "switch_core_media.c.patch", dest: "{{freeswitch_sources_path}}/src/switch_core_media.c"}
+
 - name: build libwebsockets
-  shell: mkdir -p build && cd build && cmake .. && make -j 4 && make install
+  shell: mkdir -p build && cd build && cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo && make -j 4 && make install # noqa
   args:
     chdir: "{{freeswitch_sources_path}}/libs/libwebsockets"
-    warn: False
 
 - name: build libfvad
   shell: autoreconf -i && ./configure && make -j 4 && make install
@@ -118,25 +159,134 @@
   args:
     chdir: "{{freeswitch_sources_path}}/libs/sofia-sip"
 
-- include_tasks: extra.yml 
-  when: build_with_extra|bool
+- name: copy modules into place
+  shell: cp -r -n "{{ item.src }}" "{{ item.dest }}"  # noqa
+  loop:
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_audio_fork/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_google_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_google_tts/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_dialogflow/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_aws_lex/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_aws_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_azure_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_deepgram_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_nuance_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_soniox_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_ibm_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_nvidia_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_jambonz_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+
+- name: check out aws-sdk-cpp
+  git:
+    repo: https://github.com/aws/aws-sdk-cpp.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+    version: "{{aws_sdk_version}}"
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+
+- name: check out aws-c-common
+  git:
+    repo: https://github.com/awslabs/aws-c-common.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-c-common"
+    version: main
+    accept_hostkey: yes
+    force: yes
+
+- name: check out aws-checksums
+  git:
+    repo: https://github.com/awslabs/aws-checksums.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-checksums"
+    version: main
+    accept_hostkey: yes
+    force: yes
+
+- name: build aws-c-common
+  shell: |
+    mkdir -p build && cd build
+    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter" 
+    make -j 4 && make install
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/aws-c-common"
+
+- name: build aws-sdk-cpp (transcribestreaming and lexv2-runtime)
+  shell: |
+    mkdir -p build && cd build
+    cmake .. -DBUILD_ONLY="lexv2-runtime;transcribestreaming" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter" 
+    make -j 4 && make install
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+
+- name: check out grpc
+  git: 
+    repo: https://github.com/grpc/grpc
+    dest: /usr/local/src/grpc
+    version: "{{grpc_version}}"
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+            
+- name: update submodules
+  shell: git submodule update --init --recursive
+  args:
+    chdir: /usr/local/src/grpc
+
+- name: build grpc
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    git submodule update --init --recursive
+    mkdir -p cmake/build
+    cd cmake/build
+    cmake -DBUILD_SHARED_LIBS=ON -DgRPC_SSL_PROVIDER=package -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ../..
+    make -j 4
+    make install
+  args:
+    chdir: /usr/local/src/grpc
+
+- name: check out googleapis
+  git: repo=https://github.com/googleapis/googleapis
+       dest={{freeswitch_sources_path}}/libs/googleapis
+       version="{{googleapis_version}}"
+       accept_hostkey=yes
+       force=yes
+
+- name: build googleapis
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    sed -i 's/\$fields/fields/' google/maps/routes/v1/route_service.proto
+    sed -i 's/\$fields/fields/' google/maps/routes/v1alpha/route_service.proto
+    LANGUAGE=cpp make -j 4
+  args:
+    chdir: /usr/local/src/freeswitch/libs/googleapis
+
+- name: build nuance stubs
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    LANGUAGE=cpp make -j 4
+  args:
+    chdir: /usr/local/src/freeswitch/libs/nuance-asr-grpc-api
+
+- name: build nvidia stubs
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    LANGUAGE=cpp make -j 4
+  args:
+    chdir: /usr/local/src/freeswitch/libs/riva-asr-grpc-api
+
+- name: build soniox stubs
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    LANGUAGE=cpp make -j 4
+  args:
+    chdir: /usr/local/src/freeswitch/libs/soniox-asr-grpc-api
 
 - name: bootstrap 
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
 
-- name: Freeswitch configuration (with extra modules)
-  shell: PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./{{freeswitch_configure_command}} --with-extra=yes
+- name: Freeswitch configuration
+  shell: PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./{{freeswitch_configure_command}}  # noqa
   args:
     chdir: "{{freeswitch_sources_path}}"
-    warn: False
-  when: build_with_extra|bool
-
-- name: Freeswitch configuration (without extra modules)
-  shell: PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./{{freeswitch_configure_command}}
-  args:
-    chdir: "{{freeswitch_sources_path}}"
-    warn: False
-  when: not build_with_extra|bool
 
 - name: FreeSwitch make
   shell: make -j 4 chdir={{freeswitch_sources_path}}
