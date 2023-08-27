@@ -32,6 +32,67 @@
        accept_hostkey=yes
        force=yes
 
+- name: check out aws-sdk-cpp
+  git:
+    repo: https://github.com/aws/aws-sdk-cpp.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+    version: "{{aws_sdk_version}}"
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+
+- name: check out aws-c-common
+  git:
+    repo: https://github.com/awslabs/aws-c-common.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-c-common"
+    version: main
+    accept_hostkey: yes
+    force: yes
+
+- name: check out aws-checksums
+  git:
+    repo: https://github.com/awslabs/aws-checksums.git
+    dest: "{{freeswitch_sources_path}}/libs/aws-checksums"
+    version: main
+    accept_hostkey: yes
+    force: yes
+
+- name: build aws-c-common
+  shell: |
+    mkdir -p build && cd build
+    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error" 
+    make -j 4 && make install
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/aws-c-common"
+
+- name: patch aws-sdk-cpp compiler_settings.cmake
+  shell: |
+    sed -i 's/list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")/list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-pedantic" "-Wextra")/' compiler_settings.cmake
+  args:
+    chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp/cmake"
+
+- block:
+    - name: build aws-sdk-cpp
+      shell: |
+        git submodule update --init --recursive
+        mkdir -p build && cd build
+        cmake .. -DBUILD_ONLY="lexv2-runtime;transcribestreaming" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error"
+        make -j 4 && make install
+      args:
+        chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
+  rescue:
+    - name: Handle build failure
+      debug:
+        msg: "Build failure expected on debian 12 at first, dont freak out, now we patch..."
+    - name: build aws-sdk-cpp again
+      shell: |
+        sed -i 's/uint8_t arr\[16\];/uint8_t arr\[16\] = {0};/g' /usr/local/src/freeswitch/libs/aws-sdk-cpp/build/.deps/build/src/AwsCCommon/tests/byte_buf_test.c
+        sed -i 's/char filename_array\[64\];/char filename_array\[64\] = {0};/g' /usr/local/src/freeswitch/libs/aws-sdk-cpp/build/.deps/build/src/AwsCCommon/tests/logging/logging_test_utilities.c
+        cmake .. -DBUILD_ONLY="lexv2-runtime;transcribestreaming" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error"
+        make -j 4 && make install
+      args:
+        chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp/build"
+
 - name: check out spandsp
   git: repo=https://github.com/freeswitch/spandsp.git
        dest={{freeswitch_sources_path}}/libs/spandsp
@@ -181,53 +242,6 @@
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_ibm_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_nvidia_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_jambonz_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
-
-- name: check out aws-sdk-cpp
-  git:
-    repo: https://github.com/aws/aws-sdk-cpp.git
-    dest: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
-    version: "{{aws_sdk_version}}"
-    depth: 50
-    accept_hostkey: yes
-    force: yes
-
-- name: check out aws-c-common
-  git:
-    repo: https://github.com/awslabs/aws-c-common.git
-    dest: "{{freeswitch_sources_path}}/libs/aws-c-common"
-    version: main
-    accept_hostkey: yes
-    force: yes
-
-- name: check out aws-checksums
-  git:
-    repo: https://github.com/awslabs/aws-checksums.git
-    dest: "{{freeswitch_sources_path}}/libs/aws-checksums"
-    version: main
-    accept_hostkey: yes
-    force: yes
-
-- name: build aws-c-common
-  shell: |
-    mkdir -p build && cd build
-    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error" 
-    make -j 4 && make install
-  args:
-    chdir: "{{freeswitch_sources_path}}/libs/aws-c-common"
-
-- name: patch aws-sdk-cpp compiler_settings.cmake
-  shell: |
-    sed -i 's/list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")/list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-pedantic" "-Wextra")/' compiler_settings.cmake
-  args:
-    chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp/cmake"
-
-- name: cmake aws-sdk-cpp (transcribestreaming and lexv2-runtime)
-  shell: |
-    mkdir -p build && cd build
-    cmake .. -DBUILD_DEPS=off -DBUILD_ONLY="lexv2-runtime;transcribestreaming" -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="-Wno-unused-parameter -Wno-error" 
-    make -j 4 && make install
-  args:
-    chdir: "{{freeswitch_sources_path}}/libs/aws-sdk-cpp"
 
 - name: check out grpc
   git: 
