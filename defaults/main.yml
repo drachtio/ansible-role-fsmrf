@@ -2,7 +2,9 @@
 # path to the FreeSwitch source directory
 freeswitch_sources_path: /usr/local/src/freeswitch/
 
-spandsp_version: master
+drachtio_modules_version: v0.8.0
+
+spandsp_version: 0d2e6ac
 sofia_version: master
 
 # path to the FreeSwitch install directory
@@ -12,7 +14,7 @@ freeswitch_path: /usr/local/freeswitch/
 freeswitch_secret: ClueCon 
 
 # freeswitch version
-freeswitch_version: v1.10.5
+freeswitch_version: v1.10.10
 
 # sip ports to listen on
 freeswitch_sip_port: 5080
@@ -27,7 +29,7 @@ freeswitch_owner: freeswitch
 freeswitch_group: daemon
 
 # freeswitch configure command - you can add option
-freeswitch_configure_command: configure --with-lws=yes
+freeswitch_configure_command: configure --with-lws=yes --with-extra=yes
 
 # freeswitch log configuration file template
 freeswitch_log_conf_template: ../templates/logfile.conf.xml
@@ -35,11 +37,11 @@ freeswitch_log_conf_template: ../templates/logfile.conf.xml
 # set to true if you want to build mod_google_tts, mod_google_transcribe, mod_dialogflow, and mod_aws_transcribe
 build_with_extra: false
 
-grpc_version: c66d2cc
-googleapis_version: e9da6f8b469c52b83f900e820be30762e9e05c57
+grpc_version: v1.57.0
+googleapis_version: 29374574304f3356e64423acc9ad059fe43f09b5
 
 aws_sdk_version: 1.8.129
-lws_version: v3.2.3
+lws_version: v4.3.2
 
 cloud_provider: none
 freeswitch_bind_cloud_ip: false
