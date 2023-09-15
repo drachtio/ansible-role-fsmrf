@@ -245,6 +245,7 @@
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_aws_lex/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_aws_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_azure_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
+    - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_cobalt_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_deepgram_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_nuance_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
     - {src: /usr/local/src/drachtio-freeswitch-modules/modules/mod_soniox_transcribe/, dest: "{{freeswitch_sources_path}}/src/mod/applications/"}
@@ -314,6 +315,13 @@
     LANGUAGE=cpp make -j 4
   args:
     chdir: /usr/local/src/freeswitch/libs/soniox-asr-grpc-api
+
+- name: build cobalt stubs
+  shell: |
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib
+    LANGUAGE=cpp make -j 4
+  args:
+    chdir: /usr/local/src/freeswitch/libs/cobalt-asr-grpc-api
 
 - name: bootstrap 
   shell: ./bootstrap.sh -j chdir={{freeswitch_sources_path}}
