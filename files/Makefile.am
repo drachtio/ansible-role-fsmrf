@@ -177,12 +177,6 @@ CORE_CFLAGS += -DSWITCH_HAVE_GRPC # $(GRPC_CFLAGS)
 GRPC_LIBS += -lgrpc++_reflection -lprotobuf
 endif
 
-# DH: AWS
-# if HAVE_AWS_SDK
-# CORE_CFLAGS += -DSWITCH_HAVE_AWS_SDK -DFREESWITCH_AWS_GLOBAL_INITIALIZATION
-# AWS_SDK_LIBS += -laws-cpp-sdk-lexv2-runtime -laws-cpp-sdk-transcribestreaming -laws-cpp-sdk-core -laws-crt-cpp -laws-c-mqtt -laws-c-s3 -laws-c-auth -laws-c-event-stream -laws-checksums -laws-c-http -laws-c-io -laws-c-cal -laws-c-common -ls2n -laws-c-compression -laws-c-sdkutils 
-# endif
-
 ##
 ## libfreeswitch
 ##
@@ -433,8 +427,17 @@ libs/soniox-asr-grpc-api/stubs/soniox/speech_service.grpc.pb.cc
 
 libfreeswitch_libsonioxapis_la_CPPFLAGS = -I/usr/local/include -I$(SONIOX_GENS_PATH) -std=c++17  -pthread
 
-CORE_LIBS+=libfreeswitch_libgoogleapis.la libfreeswitch_libnuanceapis.la libfreeswitch_libnvidiaapis.la libfreeswitch_libsonioxapis.la
-noinst_LTLIBRARIES += libfreeswitch_libgoogleapis.la libfreeswitch_libnuanceapis.la libfreeswitch_libnvidiaapis.la libfreeswitch_libsonioxapis.la
+#cobalt asr
+COBALT_GENS_PATH = libs/cobalt-asr-grpc-api/stubs/
+
+nodist_libfreeswitch_libcobaltapis_la_SOURCES = \
+libs/cobalt-asr-grpc-api/stubs/cobaltspeech/transcribe/v5/transcribe.pb.cc \
+libs/cobalt-asr-grpc-api/stubs/cobaltspeech/transcribe/v5/transcribe.grpc.pb.cc
+
+libfreeswitch_libcobaltapis_la_CPPFLAGS = -I/usr/local/include -I$(COBALT_GENS_PATH) -I./libs/googleapis/gens -std=c++17  -pthread
+
+CORE_LIBS+=libfreeswitch_libgoogleapis.la libfreeswitch_libnuanceapis.la libfreeswitch_libnvidiaapis.la libfreeswitch_libsonioxapis.la libfreeswitch_libcobaltapis.la
+noinst_LTLIBRARIES += libfreeswitch_libgoogleapis.la libfreeswitch_libnuanceapis.la libfreeswitch_libnvidiaapis.la libfreeswitch_libsonioxapis.la libfreeswitch_libcobaltapis.la
 
 endif
 

@@ -150,6 +150,15 @@
     accept_hostkey: yes
     force: yes
 
+- name: check out cobalt protobufs
+  git: 
+    repo: https://github.com/drachtio/cobalt-asr-grpc-api.git
+    dest: "{{freeswitch_sources_path}}/libs/cobalt-asr-grpc-api"
+    version: main
+    depth: 50
+    accept_hostkey: yes
+    force: yes
+
 - name: check out lws code
   git: 
     repo: https://github.com/warmcat/libwebsockets.git
